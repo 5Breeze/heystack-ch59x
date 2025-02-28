@@ -1,2 +1,2 @@
 Startup/startup_CH592.o: \
- C:/Users/bitshen/Desktop/Broadcaster-CH592/Startup/startup_CH592.S
+ C:/Users/Administrator/Desktop/git/heystack-ch59x/Startup/startup_CH592.S

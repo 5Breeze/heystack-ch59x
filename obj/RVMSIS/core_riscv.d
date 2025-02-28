@@ -1,2 +1,2 @@
 RVMSIS/core_riscv.o: \
- C:/Users/bitshen/Desktop/Broadcaster-CH592/RVMSIS/core_riscv.c
+ C:/Users/Administrator/Desktop/git/heystack-ch59x/RVMSIS/core_riscv.c

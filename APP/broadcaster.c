@@ -19,7 +19,7 @@
 #define DEFAULT_ADVERTISING_INTERVAL 1600 * 2
 
 // 密钥转换间隔
-#define SBP_PERIODIC_EVT_PERIOD 3600 * 3 * 1000 * 1600 //3小时
+#define SBP_PERIODIC_EVT_PERIOD 3600 * 3 * 1600 //3小时
 
 // 电压粗调校准循环次数
 #define BAT_MAX_COUNTS 2
@@ -45,6 +45,7 @@ static uint8_t Broadcaster_TaskID;
 
 // 初始化广播地址
 static uint8_t bt_addr[6] = { 0xFF, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+
 /** 广播载荷 */
 static uint8_t advertData[] = {
     0x1e, /* 长度 (30) */
@@ -171,7 +172,7 @@ void set_and_advertise_next_key()
     advertData[6] = status_flag;
 
     // Set key to be advertised
-    ble_set_advertisement_key(public_key[current_index]);
+    ble_set_advertisement_key((const char *)public_key[current_index]);
 }
 
 /*********************************************************************
@@ -255,7 +256,7 @@ uint16_t Broadcaster_ProcessEvent(uint8_t task_id, uint16_t events)
         GAPRole_BroadcasterStartDevice(&Broadcaster_BroadcasterCBs);
         // Find the last filled index
         for (int i = MAX_KEYS - 2; i >= 0; i--) {
-            if (strlen(public_key[i]) > 0) {
+          if (strlen((const char *)public_key[i]) > 0) {
                 last_filled_index = i;
                 break;
             }
@@ -266,7 +267,7 @@ uint16_t Broadcaster_ProcessEvent(uint8_t task_id, uint16_t events)
 
     if (events & SBP_PERIODIC_EVT) {
         tmos_start_task(Broadcaster_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
-        ble_set_advertisement_key();
+        set_and_advertise_next_key();
         GAP_UpdateAdvertisingData(0, TRUE, sizeof(advertData), advertData);
         return (events ^ SBP_PERIODIC_EVT);
     }
