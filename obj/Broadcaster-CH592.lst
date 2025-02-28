@@ -6637,7 +6637,7 @@ C:/Users/Administrator/Desktop/git/heystack-ch59x/HAL/MCU.c:99
     24c8:	02f10323          	sb	a5,38(sp)
 C:/Users/Administrator/Desktop/git/heystack-ch59x/HAL/MCU.c:100
     cfg.TxPower = (uint32_t)BLE_TX_POWER;
-    24cc:	d1540793          	addi	a5,s0,-747 # d15 <_einit+0xd11>
+    24cc:	d3b40793          	addi	a5,s0,-709 # d3b <_einit+0xd37>
     24d0:	02f11423          	sh	a5,40(sp)
 C:/Users/Administrator/Desktop/git/heystack-ch59x/HAL/MCU.c:132
         GetMACAddress(MacAddr);
