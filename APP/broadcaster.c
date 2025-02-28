@@ -45,7 +45,7 @@ static uint8_t Broadcaster_TaskID;
 
 // 初始化广播地址
 static uint8_t bt_addr[6] = { 0xFF, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-
+static uint8_t bt_addr2[6] = { 0xFF, 0xAA, 0xCC, 0xDD, 0xEE, 0xFF };
 /** 广播载荷 */
 static uint8_t advertData[] = {
     0x1e, /* 长度 (30) */
@@ -102,19 +102,19 @@ static void fill_adv_template_from_key(const char* key)
     advertData[29] = key[0] >> 6;
 }
 
-// 动态修改MAC地址
-__HIGH_CODE
-static void ble_set_mac_address(uint8_t* addr)
-{
-    uint8_t initial_advertising_enable = 0;
-    // 关闭广播
-    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
-    // 修改MAC地址
-    GAP_ConfigDeviceAddr(ADDRTYPE_PRIVATE_NONRESOLVE, addr);
-    initial_advertising_enable = 1;
-    // 开启广播
-    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
-}
+// // 动态修改MAC地址
+// __HIGH_CODE
+// static void ble_set_mac_address()
+// {
+//    uint8_t initial_advertising_enable = 0;
+//    // 关闭广播
+//    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+//    // 修改MAC地址
+//    GAP_ConfigDeviceAddr(ADDRTYPE_PRIVATE_NONRESOLVE, bt_addr2);
+//    initial_advertising_enable = 1;
+//    // 开启广播
+//    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+// }
 
 // 电池电压采样
 __HIGH_CODE
@@ -155,7 +155,6 @@ void ble_set_advertisement_key(const char* key)
 {
     set_addr_from_key(key);
     fill_adv_template_from_key(key);
-    ble_set_mac_address(bt_addr);
 }
 
 __HIGH_CODE
@@ -265,11 +264,33 @@ uint16_t Broadcaster_ProcessEvent(uint8_t task_id, uint16_t events)
         return (events ^ SBP_START_DEVICE_EVT);
     }
 
-    if (events & SBP_PERIODIC_EVT) {
-        tmos_start_task(Broadcaster_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
+    // if (events & SBP_PERIODIC_EVT) {
+    //     tmos_start_task(Broadcaster_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
+    //     set_and_advertise_next_key();
+    //     GAP_UpdateAdvertisingData(0, TRUE, sizeof(advertData), advertData);
+    //     return (events ^ SBP_PERIODIC_EVT);
+    // }
+    if(events & SBP_PERIODIC_EVT)
+    {
+        uint8_t initial_advertising_enable = 0;
+        GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+        tmos_start_task(Broadcaster_TaskID, SBP_ADV_IN_CONNECTION_EVT, 600);
+        return (events ^ SBP_PERIODIC_EVT);
+    }
+ 
+    if(events & SBP_ADV_IN_CONNECTION_EVT)
+    {
+        //获取密钥填充密钥和电池，获取MAC地址
         set_and_advertise_next_key();
         GAP_UpdateAdvertisingData(0, TRUE, sizeof(advertData), advertData);
-        return (events ^ SBP_PERIODIC_EVT);
+
+        GAP_ConfigDeviceAddr(ADDRTYPE_PRIVATE_NONRESOLVE, bt_addr);
+ 
+        uint8_t initial_advertising_enable = 1;
+        GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+ 
+        tmos_start_task(Broadcaster_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
+        return (events ^ SBP_ADV_IN_CONNECTION_EVT);
     }
 
     return 0;
