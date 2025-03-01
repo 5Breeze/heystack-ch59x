@@ -1,4 +1,4 @@
-APP/broadcaster.o: ../APP/broadcaster.c \
+APP/broadcaster.d: ../APP/broadcaster.c \
  C:\Users\bitshen\Desktop\git\heystack-ch59x\HAL\include/CONFIG.h \
  C:\Users\bitshen\Desktop\git\heystack-ch59x\LIB/CH59xBLE_LIB.h \
  C:\Users\bitshen\Desktop\git\heystack-ch59x\StdPeriphDriver\inc/CH59x_common.h \

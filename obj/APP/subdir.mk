@@ -18,6 +18,9 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
+APP/broadcaster.o: ../APP/broadcaster.c
+	@	@	riscv-none-elf-gcc -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common  -g -DCLK_OSC32K=0 -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\Startup" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\APP\include" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\Profile\include" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\StdPeriphDriver\inc" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\HAL\include" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\Ld" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\LIB" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\RVMSIS" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"APP/broadcaster.d" -c -o "$@" "$<"
+	@	@
 APP/%.o: ../APP/%.c
 	@	@	riscv-none-elf-gcc -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common  -g -DCLK_OSC32K=0 -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\Startup" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\APP\include" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\Profile\include" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\StdPeriphDriver\inc" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\HAL\include" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\Ld" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\LIB" -I"C:\Users\bitshen\Desktop\git\heystack-ch59x\RVMSIS" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
 	@	@

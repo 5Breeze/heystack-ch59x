@@ -19,7 +19,7 @@
 #define DEFAULT_ADVERTISING_INTERVAL 1600 * 2
 
 // 密钥转换间隔
-#define SBP_PERIODIC_EVT_PERIOD 3600 * 3 * 1600 //3小时
+#define SBP_PERIODIC_EVT_PERIOD 1 * 60 * 60 * 1600 //1 hour
 
 // 电压粗调校准循环次数
 #define BAT_MAX_COUNTS 2
@@ -27,7 +27,7 @@
 #define MAX_KEYS 50
 
 // Create space for MAX_KEYS public keys
-static volatile const char public_key[MAX_KEYS + 1][28] = {
+static const uint8_t public_key[MAX_KEYS + 1][28] = {
     [0] = "OFFLINEFINDINGPUBLICKEYHERE!",
     [MAX_KEYS] = "ENDOFKEYSENDOFKEYSENDOFKEYS!",
 };
@@ -83,7 +83,7 @@ static gapRolesBroadcasterCBs_t Broadcaster_BroadcasterCBs = {
 
 // 从key中获取地址
 __HIGH_CODE
-static void set_addr_from_key(const char* key)
+static void set_addr_from_key(const uint8_t* key)
 {
     /* copy first 6 bytes */
     bt_addr[5] = key[0] | 0b11000000;
@@ -96,7 +96,7 @@ static void set_addr_from_key(const char* key)
 
 // 将key填充入广播
 __HIGH_CODE
-static void fill_adv_template_from_key(const char* key)
+static void fill_adv_template_from_key(const uint8_t* key)
 {
     memcpy(&advertData[7], &key[6], 22);
     advertData[29] = key[0] >> 6;
@@ -151,7 +151,7 @@ void get_battery()
 }
 
 __HIGH_CODE
-void ble_set_advertisement_key(const char* key)
+void ble_set_advertisement_key(const uint8_t* key)
 {
     set_addr_from_key(key);
     fill_adv_template_from_key(key);
@@ -171,7 +171,7 @@ void set_and_advertise_next_key()
     advertData[6] = status_flag;
 
     // Set key to be advertised
-    ble_set_advertisement_key((const char *)public_key[current_index]);
+    ble_set_advertisement_key((const uint8_t *)public_key[current_index]);
 }
 
 /*********************************************************************
@@ -263,27 +263,19 @@ uint16_t Broadcaster_ProcessEvent(uint8_t task_id, uint16_t events)
         set_and_advertise_next_key();
         return (events ^ SBP_START_DEVICE_EVT);
     }
-
-    // if (events & SBP_PERIODIC_EVT) {
-    //     tmos_start_task(Broadcaster_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
-    //     set_and_advertise_next_key();
-    //     GAP_UpdateAdvertisingData(0, TRUE, sizeof(advertData), advertData);
-    //     return (events ^ SBP_PERIODIC_EVT);
-    // }
     if(events & SBP_PERIODIC_EVT)
     {
         uint8_t initial_advertising_enable = 0;
         GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+        //获取密钥填充密钥和电池，获取MAC地址
+        set_and_advertise_next_key();
+        GAP_UpdateAdvertisingData(0, TRUE, sizeof(advertData), advertData);
         tmos_start_task(Broadcaster_TaskID, SBP_ADV_IN_CONNECTION_EVT, 600);
         return (events ^ SBP_PERIODIC_EVT);
     }
  
     if(events & SBP_ADV_IN_CONNECTION_EVT)
     {
-        //获取密钥填充密钥和电池，获取MAC地址
-        set_and_advertise_next_key();
-        GAP_UpdateAdvertisingData(0, TRUE, sizeof(advertData), advertData);
-
         GAP_ConfigDeviceAddr(ADDRTYPE_PRIVATE_NONRESOLVE, bt_addr);
  
         uint8_t initial_advertising_enable = 1;
